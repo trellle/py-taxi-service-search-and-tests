@@ -73,7 +73,8 @@ class DriverViewsTest(TestCase):
         self.assertFalse(
             get_user_model().objects.filter(id=driver.id).exists()
         )
-    
+
+
 class TestAdminPanel(TestCase):
     def setUp(self) -> None:
         self.client = Client()
@@ -88,7 +89,7 @@ class TestAdminPanel(TestCase):
             password="pass123",
             license_number="BOB01234"
         )
-    
+
     def test_list_display(self):
         url = reverse("admin:taxi_driver_changelist")
         res = self.client.get(url)
@@ -107,10 +108,12 @@ class TestViews(TestCase):
 
 class FormsTests(TestCase):
     def test_car_form(self):
-        self.manufacturer = Manufacturer.objects.create(name="ZAZ", country="Ukraine")
-        self.driver = get_user_model().objects.create(username="driver",
-                                                      password="pass123",
-                                                      license_number="BOB01234")
+        self.manufacturer = Manufacturer.objects.create(name="ZAZ",
+                                                        country="Ukraine")
+        self.driver = (get_user_model().objects.
+                       create(username="driver",
+                              password="pass123",
+                              license_number="BOB01234"))
         form_data = {
             "model": "Daewoo",
             "manufacturer": self.manufacturer,
@@ -128,4 +131,5 @@ class FormsTests(TestCase):
         )
         field = form.fields["drivers"]
         self.assertTrue(isinstance(field, ModelMultipleChoiceField))
-        self.assertTrue(isinstance(field.widget, CheckboxSelectMultiple))
+        self.assertTrue(isinstance(field.widget,
+                                   CheckboxSelectMultiple))
