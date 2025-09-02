@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase, Client
 from django.urls import reverse
-from taxi.models import Manufacturer, Driver
+from taxi.models import Manufacturer, Car
 from django.forms import ModelMultipleChoiceField, CheckboxSelectMultiple
 from taxi.forms import CarForm
 
@@ -133,3 +133,107 @@ class FormsTests(TestCase):
         self.assertTrue(isinstance(field, ModelMultipleChoiceField))
         self.assertTrue(isinstance(field.widget,
                                    CheckboxSelectMultiple))
+
+
+class TestSearch(TestCase):
+    def setUp(self) -> None:
+        self.client = Client()
+        self.admin_user = get_user_model().objects.create_superuser(
+            license_number="ROB12345",
+            username="admin",
+            password="admin123"
+        )
+        self.client.force_login(self.admin_user)
+        self.driver = get_user_model().objects.create_user(
+            username="driver",
+            password="pass123",
+            license_number="BOB01234"
+        )
+        self.manufacturer = Manufacturer.objects.create(name="ZAZ",
+                                                        country="Ukraine")
+        self.car = Car.objects.create(
+            model="Daewoo",
+            manufacturer=self.manufacturer
+        )
+        self.car.drivers.set([self.driver])
+
+    def test_manufacturer_empty(self):
+        test_name = ""
+        response = self.client.get(
+            reverse("taxi:manufacturer-list"),
+            data={"manufacturer-search": test_name},
+        )
+        queryset = Manufacturer.objects.all()
+        self.assertEqual(list(response.context["manufacturer_list"]), list(queryset))
+    
+    def test_manufacturer_missing(self):
+        test_name = "wrong name"
+        response = self.client.get(
+            reverse("taxi:manufacturer-list"),
+            data={"manufacturer-search": test_name},
+        )
+        queryset = Manufacturer.objects.filter(name=test_name)
+        self.assertEqual(list(response.context["manufacturer_list"]), list(queryset))
+
+    def test_manufacturer_valid(self):
+        test_name = "ZAZ"
+        response = self.client.get(
+            reverse("taxi:manufacturer-list"),
+            data={"manufacturer-search": test_name},
+        )
+        queryset = Manufacturer.objects.filter(name=test_name)
+        self.assertEqual(list(response.context["manufacturer_list"]), list(queryset))
+
+    def test_car_missing(self):
+        test_model = "wrong model"
+        response = self.client.get(
+            reverse("taxi:car-list"),
+            data={"car-search": test_model},
+        )
+        queryset = Car.objects.filter(model=test_model)
+        self.assertEqual(list(response.context["car_list"]), list(queryset))
+
+    def test_car_empty(self):
+        test_model = ""
+        response = self.client.get(
+            reverse("taxi:car-list"),
+            data={"car-search": test_model},
+        )
+        queryset = Car.objects.all()
+        self.assertEqual(list(response.context["car_list"]), list(queryset))
+
+    def test_car_valid(self):
+        test_model = "Daewoo"
+        response = self.client.get(
+            reverse("taxi:car-list"),
+            data={"car-search": test_model},
+        )
+        queryset = Car.objects.filter(model=test_model)
+        self.assertEqual(list(response.context["car_list"]), list(queryset))
+
+    def test_driver_missing(self):
+        test_username = "wrong username"
+        response = self.client.get(
+            reverse("taxi:driver-list"),
+            data={"driver-search": test_username},
+        )
+        queryset = get_user_model().objects.filter(username=test_username)
+        self.assertEqual(list(response.context["driver_list"]), list(queryset))
+
+    def test_driver_empty(self):
+        test_username = ""
+        response = self.client.get(
+            reverse("taxi:driver-list"),
+            data={"driver-search": test_username},
+        )
+        queryset = get_user_model().objects.all()
+        self.assertEqual(list(response.context["driver_list"]), list(queryset))
+
+    def test_driver_valid(self):
+        test_username = "driver"
+        response = self.client.get(
+            reverse("taxi:driver-list"),
+            data={"driver-search": test_username},
+        )
+        queryset = get_user_model().objects.filter(username=test_username)
+        self.assertEqual(list(response.context["driver_list"]), list(queryset))

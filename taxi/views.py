@@ -45,6 +45,13 @@ class ManufacturerListView(LoginRequiredMixin, generic.ListView):
         context = super(ManufacturerListView, self).get_context_data(**kwargs)
         context["search_form"] = ManufacturerSearchForm()
         return context
+    
+    def get_queryset(self):
+        queryset = Manufacturer.objects.all()
+        manufacturer = self.request.GET.get("manufacturer-search")
+        if manufacturer:
+            queryset = queryset.filter(name__icontains=manufacturer)
+        return queryset
 
 
 class ManufacturerCreateView(LoginRequiredMixin, generic.CreateView):
@@ -73,6 +80,13 @@ class CarListView(LoginRequiredMixin, generic.ListView):
         context = super(CarListView, self).get_context_data(**kwargs)
         context["search_form"] = CarSearchForm()
         return context
+    
+    def get_queryset(self):
+        queryset = Car.objects.all()
+        car = self.request.GET.get("car-search")
+        if car:
+            queryset = queryset.filter(model__icontains=car)
+        return queryset
 
 
 class CarDetailView(LoginRequiredMixin, generic.DetailView):
@@ -104,6 +118,13 @@ class DriverListView(LoginRequiredMixin, generic.ListView):
         context = super(DriverListView, self).get_context_data(**kwargs)
         context["search_form"] = DriverSearchForm()
         return context
+    
+    def get_queryset(self):
+        queryset = Driver.objects.all()
+        driver = self.request.GET.get("driver-search")
+        if driver:
+            queryset = queryset.filter(username__icontains=driver)
+        return queryset
 
 
 class DriverDetailView(LoginRequiredMixin, generic.DetailView):
