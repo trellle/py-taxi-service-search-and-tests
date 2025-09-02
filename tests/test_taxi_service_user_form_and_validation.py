@@ -164,8 +164,9 @@ class TestSearch(TestCase):
             data={"manufacturer-search": test_name},
         )
         queryset = Manufacturer.objects.all()
-        self.assertEqual(list(response.context["manufacturer_list"]), list(queryset))
-    
+        self.assertEqual(list(response.context["manufacturer_list"]),
+                         list(queryset))
+
     def test_manufacturer_missing(self):
         test_name = "wrong name"
         response = self.client.get(
@@ -173,7 +174,8 @@ class TestSearch(TestCase):
             data={"manufacturer-search": test_name},
         )
         queryset = Manufacturer.objects.filter(name=test_name)
-        self.assertEqual(list(response.context["manufacturer_list"]), list(queryset))
+        self.assertEqual(list(response.context["manufacturer_list"]),
+                         list(queryset))
 
     def test_manufacturer_valid(self):
         test_name = "ZAZ"
@@ -182,7 +184,8 @@ class TestSearch(TestCase):
             data={"manufacturer-search": test_name},
         )
         queryset = Manufacturer.objects.filter(name=test_name)
-        self.assertEqual(list(response.context["manufacturer_list"]), list(queryset))
+        self.assertEqual(list(response.context["manufacturer_list"]),
+                         list(queryset))
 
     def test_car_missing(self):
         test_model = "wrong model"
